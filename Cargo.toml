@@ -1,0 +1,54 @@
+[package]
+name = "mumps-src"
+version = "0.1.0+5.6.2"
+edition = "2021"
+build = "build.rs"
+links = "Mumps"
+license = "Apache-2.0"
+description = "Build Mumps as a crate."
+repository = "https://github.com/Maroon502/mumps-src"
+keywords = ["coin-or", "Mumps", "Mumps-src"]
+readme = "../README.md"
+authors = [
+    "Maroon"
+]
+
+exclude = [
+   "Mumps/**/*",
+   "!Mumps/Mumps/src/**/*",
+   "!**/LICENSE",
+   "!**/AUTHORS",
+]
+
+[features]
+# default = ["openblas-static", "d_arith"]
+default = ["intel-mkl-static", "d_arith"]
+openblas-system = ["openblas-src/system"]
+openblas-static = ["openblas-src/static"]
+intel-mkl-system = ["intel-mkl-src/mkl-dynamic-lp64-seq"]
+intel-mkl-static = ["intel-mkl-src/mkl-static-lp64-seq"]
+
+d_arith = [] # double, real, precision
+s_arith = [] # single, real, precision
+c_arith = [] # single, complex, precision
+z_arith = [] # double, complex, precision
+
+# libseq = []
+# metis = []
+
+[dependencies]
+openblas-src = { version = "0.10", optional = true}
+intel-mkl-src = { version = "0.8", optional = true}
+
+[build-dependencies]
+cc = { version = "1.0", features = ["parallel"] }
+coin-build-tools = "0.2"
+anyhow = "1.0"
+tar = "0.4"
+flate2 = "1.0"
+native-tls = { version = "0.2", features = ["vendored"] }
+ureq = { version = "2.9", default-features = false, features = [
+    "native-certs",
+    "native-tls",
+    "gzip",
+] }
