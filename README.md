@@ -11,18 +11,19 @@ Mumps (MUltifrontal Massively Parallel sparse direct Solver) is is a package for
 **attention:** Only sequential version is supported now. And `Metis` is not supported now.
 
 ## Usage
+
 1. Add the following to your `Cargo.toml`:
 
-```toml
-[dependencies]
-mumps-src = "0.1"
-```
+    ```toml
+    [dependencies]
+    mumps-src = "0.1"
+    ```
 
 2. Add the following to your `lib.rs`:
 
-```toml
-extern crate mumps_src;
-```
+    ```toml
+    extern crate mumps_src;
+    ```
 
 This package does not provide bindings.
 
@@ -49,14 +50,12 @@ Because [openblas-src]'s Issue [#101](https://github.com/blas-lapack-rs/openblas
 
 Add this to your `project/.cargo/config.toml`.
 
-```
+```toml
 [patch.crates-io]
 openblas-src = { git = "https://github.com/mike-kfed/openblas-src.git", branch = "arm-cross-compile" }
 ```
 
-you can compile it for the other target by providing the `--target` option to 
-`cargo build`. 
-
+you can compile it for the other target by providing the `--target` option to `cargo build`.
 
 | Target                               |  supported  |
 |--------------------------------------|:-----------:|
@@ -77,7 +76,6 @@ pull request. Note that any contribution submitted for inclusion in the project
 will be licensed according to the terms given in [LICENSE](license-url).
 
 [Mumps]: https://mumps-solver.org/
-[Mumps-src]: https://github.com/Maroon502/mumps-src
 
 [documentation-img]: https://docs.rs/mumps-src/badge.svg
 [documentation-url]: https://docs.rs/mumps-src

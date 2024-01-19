@@ -8,21 +8,13 @@ license = "Apache-2.0"
 description = "Build Mumps as a crate."
 repository = "https://github.com/Maroon502/mumps-src"
 keywords = ["coin-or", "Mumps", "Mumps-src"]
-readme = "../README.md"
+readme = "README.md"
 authors = [
     "Maroon"
 ]
 
-exclude = [
-   "Mumps/**/*",
-   "!Mumps/Mumps/src/**/*",
-   "!**/LICENSE",
-   "!**/AUTHORS",
-]
-
 [features]
-# default = ["openblas-static", "d_arith"]
-default = ["intel-mkl-static", "d_arith"]
+default = ["openblas-static", "d_arith"]
 openblas-system = ["openblas-src/system"]
 openblas-static = ["openblas-src/static"]
 intel-mkl-system = ["intel-mkl-src/mkl-dynamic-lp64-seq"]

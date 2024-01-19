@@ -1,4 +1,5 @@
 use std::env;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
@@ -9,48 +10,66 @@ const LIB_NAME: &str = "Mumps";
 const LIB_VERSION: &str = "5.6.2";
 
 fn main() {
-    println!("cargo:rerun-if-changed=CoinUtils_lib_sources.txt");
-    
     let download_dir = if let Ok(p) = env::var("MUMPS_DOWNLOAD_DIR") {
         p
     } else {
-       env::var("OUT_DIR").unwrap()
+        env::var("OUT_DIR").unwrap()
     };
-    
-    let lib_dir = format!("{}/{}_{}", download_dir, LIB_NAME, LIB_VERSION);
+
+    let lib_dir = format!(
+        "{}/{}_{}",
+        download_dir,
+        LIB_NAME.to_uppercase(),
+        LIB_VERSION
+    );
     if !Path::new(&format!("{}/LICENSE", lib_dir)).exists() {
         download_mumps(download_dir, LIB_VERSION).unwrap();
     }
     build_lib_and_link(lib_dir.as_str());
-
 }
 
 fn build_lib_and_link(lib_dir: &str) {
     let _target = env::var("TARGET").unwrap();
 
     let out_dir = env::var("OUT_DIR").unwrap();
-    let target_dir = PathBuf::from(&out_dir)
-        .join("build");
+    let target_dir = PathBuf::from(&out_dir).join("build");
 
     //config
     let mut config = coinbuilder::init_builder();
-    config
-        .cpp(false)
-        .out_dir(target_dir.clone());
-
+    config.cpp(false).out_dir(target_dir.clone());
 
     config.define("Add_", None); //Add_, Add__ for G95,  UPPER
 
-    config.flag(&format!("-J{}", target_dir.display()));
-        // .flag("-fallow-argument-mismatch");
+    config
+        .flag(&format!("-J{}", target_dir.display()))
+        .flag("-fallow-argument-mismatch");
 
     let src_dir = PathBuf::from(lib_dir).join("src");
     let mut includes_dir = vec![format!("{}/include", lib_dir)];
 
+    let path = target_dir.join("mumps_int_def.h");
+    std::fs::create_dir_all(&target_dir).expect("cannot create target_dir");
+    let mut file = std::fs::File::create(path).unwrap();
+    let buf = b"#if ! defined(MUMPS_INT_H)
+#define MUMPS_INT_H
+#define MUMPS_INTSIZE32 //default to int32
+// #define MUMPS_INTSIZE64
+#endif
+    ";
+    file.write_all(buf).expect("Write Error!");
+    file.flush().expect("Write Error!");
+    includes_dir.push(target_dir.display().to_string());
+
     // build common
     let (files_common_mod, files_common_oth) = Mumps_files_common();
-    let files_common_mod = files_common_mod.iter().map(|f|format!("{}/{}", src_dir.display(), f)).collect::<Vec<_>>();
-    let mut files_common_oth  = files_common_oth.iter().map(|f|format!("{}/{}", src_dir.display(), f)).collect::<Vec<_>>();
+    let files_common_mod = files_common_mod
+        .iter()
+        .map(|f| format!("{}/{}", src_dir.display(), f))
+        .collect::<Vec<_>>();
+    let mut files_common_oth = files_common_oth
+        .iter()
+        .map(|f| format!("{}/{}", src_dir.display(), f))
+        .collect::<Vec<_>>();
     // libseq
     includes_dir.push(format!("{}/libseq", lib_dir));
     files_common_oth.push(format!("{}/libseq/mpi.f", lib_dir));
@@ -84,15 +103,23 @@ fn build_lib_and_link(lib_dir: &str) {
     build_mumps_arith(config.clone(), "z", src_dir);
 
     coinbuilder::print_metadata(includes_dir, vec![]);
-
 }
 
 fn build_mumps_arith(mut config: Build, arith: &str, src_dir: PathBuf) {
-    config.define("MUMPS_ARITH", Some(format!("MUMPS_ARITH_{}", arith).as_str()));
+    config.define(
+        "MUMPS_ARITH",
+        Some(format!("MUMPS_ARITH_{}", arith).as_str()),
+    );
 
     let (files_arith_mod, files_arith_oth) = Mumps_files_arith(arith);
-    let files_arith_mod = files_arith_mod.iter().map(|f|format!("{}/{}", src_dir.display(), f)).collect::<Vec<_>>();
-    let files_arith_oth  = files_arith_oth.iter().map(|f|format!("{}/{}", src_dir.display(), f)).collect::<Vec<_>>();
+    let files_arith_mod = files_arith_mod
+        .iter()
+        .map(|f| format!("{}/{}", src_dir.display(), f))
+        .collect::<Vec<_>>();
+    let files_arith_oth = files_arith_oth
+        .iter()
+        .map(|f| format!("{}/{}", src_dir.display(), f))
+        .collect::<Vec<_>>();
 
     // compile
     for (i, file_arith_mod) in files_arith_mod.iter().enumerate() {
@@ -108,20 +135,14 @@ fn build_mumps_arith(mut config: Build, arith: &str, src_dir: PathBuf) {
         .compile(&format!("Mumps_arith_{}", arith));
 }
 
-pub fn download_mumps<P: AsRef<Path>>(
-    download_dir: P,
-    lib_version: &str,
-) -> Result<PathBuf> {
+pub fn download_mumps<P: AsRef<Path>>(download_dir: P, lib_version: &str) -> Result<PathBuf> {
     let lib_name = LIB_NAME;
     let url = format!("http://mumps-solver.org/MUMPS_{}.tar.gz", lib_version);
     let dest = download_dir
         .as_ref()
         .join(format!("{}_{}", lib_name.to_uppercase(), lib_version));
     if !dest.exists() {
-        let buf = get_agent()
-            .get(url.as_str())
-            .call()?
-            .into_reader();
+        let buf = get_agent().get(url.as_str()).call()?.into_reader();
         let gz_stream = flate2::read::GzDecoder::new(buf);
         let mut ar = tar::Archive::new(gz_stream);
         ar.unpack(&download_dir)?;
@@ -137,7 +158,6 @@ fn get_agent() -> ureq::Agent {
         ))
         .build()
 }
-
 
 #[allow(non_snake_case)]
 fn Mumps_files_common() -> (Vec<String>, Vec<String>) {
@@ -308,8 +328,14 @@ fn Mumps_files_arith(arith: &str) -> (Vec<String>, Vec<String>) {
         "mumps_gpu.c".to_string(),
     ];
 
-    let files_arith_mod = files_mod.iter().map(|f|format!("{}{}", arith, f)).collect();
-    let mut files_arith_oth: Vec<_> = files_oth.iter().map(|f|format!("{}{}", arith, f)).collect();
+    let files_arith_mod = files_mod
+        .iter()
+        .map(|f| format!("{}{}", arith, f))
+        .collect();
+    let mut files_arith_oth: Vec<_> = files_oth
+        .iter()
+        .map(|f| format!("{}{}", arith, f))
+        .collect();
     files_arith_oth.push("mumps_c.c".to_string());
 
     (files_arith_mod, files_arith_oth)
