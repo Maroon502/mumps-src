@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 use cc::Build;
-use coin_build_tools::coinbuilder;
+use coin_build_tools::{coinbuilder,link, utils};
 
 const LIB_NAME: &str = "Mumps";
 const LIB_VERSION: &str = "5.6.2";
@@ -15,6 +15,12 @@ fn main() {
     } else {
         env::var("OUT_DIR").unwrap()
     };
+
+    let want_system = utils::want_system(LIB_NAME);
+
+    if want_system && link::link_lib_system_if_supported(LIB_NAME) {
+        return;
+    }
 
     let lib_dir = format!(
         "{}/{}_{}",
