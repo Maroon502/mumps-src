@@ -10,9 +10,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - allow to link to system libraries
-
-### Other
-- Update Action
-- Update Action
-- Update Action
-- Update Action
