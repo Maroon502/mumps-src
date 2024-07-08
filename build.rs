@@ -7,7 +7,7 @@ use cc::Build;
 use coin_build_tools::{coinbuilder,link, utils};
 
 const LIB_NAME: &str = "Mumps";
-const LIB_VERSION: &str = "5.6.2";
+const LIB_VERSION: &str = "5.7.2";
 
 fn main() {
     let download_dir = if let Ok(p) = env::var("MUMPS_DOWNLOAD_DIR") {
@@ -189,16 +189,16 @@ fn Mumps_files_common() -> (Vec<String>, Vec<String>) {
         "mumps_pivnul_mod.F".to_string(),
     ];
     let files_common_oth = vec![
+        "sol_ds_common_m.F".to_string(),
+        "mumps_comm_ibcast.F".to_string(),
         "ana_AMDMF.F".to_string(),
         "ana_blk.F".to_string(),
         "ana_orderings.F".to_string(),
         "ana_set_ordering.F".to_string(),
         "bcast_errors.F".to_string(),
         "estim_flops.F".to_string(),
-        "mumps_comm_ibcast.F".to_string(),
         "mumps_print_defined.F".to_string(),
         "mumps_type2_blocking.F".to_string(),
-        "mumps_type_size.F".to_string(),
         "mumps_version.F".to_string(),
         "sol_common.F".to_string(),
         "tools_common.F".to_string(),
@@ -238,7 +238,6 @@ fn Mumps_files_arith(arith: &str) -> (Vec<String>, Vec<String>) {
         "mumps_lr_data_m.F".to_string(),
         "lr_stats.F".to_string(),
         "lr_core.F".to_string(),
-        "ana_dist_m.F".to_string(),
         "mumps_comm_buffer.F".to_string(),
         "mumps_load.F".to_string(),
         "ana_lr.F".to_string(),
@@ -260,6 +259,7 @@ fn Mumps_files_arith(arith: &str) -> (Vec<String>, Vec<String>) {
         "fac_sispointers_m.F".to_string(),
         "fac_omp_m.F".to_string(),
         "fac_par_m.F".to_string(),
+        "mumps_mpi3_mod.F".to_string(),
         "mumps_save_restore_files.F".to_string(),
         "mumps_save_restore.F".to_string(),
         "mumps_sol_es.F".to_string(),
@@ -269,6 +269,7 @@ fn Mumps_files_arith(arith: &str) -> (Vec<String>, Vec<String>) {
     ];
 
     let files_oth = vec![
+        "ana_dist_m.F".to_string(),
         "ana_aux_ELT.F".to_string(),
         "ana_driver.F".to_string(),
         "ana_LDLT_preprocess.F".to_string(),
@@ -281,6 +282,8 @@ fn Mumps_files_arith(arith: &str) -> (Vec<String>, Vec<String>) {
         "fac_asm.F".to_string(),
         "fac_b.F".to_string(),
         "fac_determinant.F".to_string(),
+        "fac_diag.F".to_string(),
+        "fac_dist_arrowheads_omp.F".to_string(),
         "fac_distrib_distentry.F".to_string(),
         "fac_distrib_ELT.F".to_string(),
         "fac_driver.F".to_string(),
