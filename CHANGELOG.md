@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4+5.8.0](https://github.com/Maroon502/mumps-src/compare/v0.1.3+5.8.0...v0.1.4+5.8.0) - 2026-01-01
+
+### Other
+
+- *(deps)* bump actions/cache from 4 to 5 ([#8](https://github.com/Maroon502/mumps-src/pull/8))
+- *(deps)* bump actions/checkout from 4 to 6 ([#6](https://github.com/Maroon502/mumps-src/pull/6))
+
 ## [0.1.3+5.8.0](https://github.com/Maroon502/mumps-src/compare/v0.1.2+5.7.2...v0.1.3+5.8.0) - 2025-05-21
 
 ### Other
